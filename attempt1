@@ -39,5 +39,5 @@ for i in range(totalDrones):
     plt.show()
     #time.sleep(5) #allows the plot to update
     
-    
+print("x,y,z\n")  
 print(x,y,z)
