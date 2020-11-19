@@ -14,7 +14,7 @@ def animation_frame(i):
     x_data.append(i * 10)
     y_data.append(i)
     
-    z=input("my name jeff?: ")
+    z=input("test: ")
     print(z)
     
     line.set_xdata(x_data)
