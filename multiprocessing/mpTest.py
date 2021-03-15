@@ -6,9 +6,11 @@ def sd(con, con2,q): #can communicate with main and ud
         #reading from server
         recieved = con[1].recv()                       #once something is in the pipe, store it in recieved
         myInt = int(recieved)*int(recieved)            #square it
+        myTime = time.perf_counter()
+        cat = [myInt, myTime]
         
         #writing to ud
-        con2[0].send(myInt)
+        con2[0].send(cat)
 
         #reading from ud
         new_out = con2[1].recv()
@@ -20,11 +22,10 @@ def ud(con2,q): #can only communicate with sd
     while True:
         #reading
         inp = con2[1].recv()        #once something is in the pipe, store it in recieved
-        inp *= 2
-        concat = [inp, inp-5]
+        inp.append("yoshi")
         
         #writing
-        con2[0].send(concat)
+        con2[0].send(inp)
     
 if __name__ == "__main__":
     
