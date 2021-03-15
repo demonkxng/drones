@@ -40,14 +40,14 @@ if __name__ == "__main__":
     #list for storing all UD processes
     ud_processes = []
     
-    #intialize UDs
+     #intialize UDs
     for i in range(5):
        sd_conn, ud_conn = multiprocessing.Pipe()    # creating a pipe
        connections = [sd_conn, ud_conn]             # renaming for easier use of pipes
-       sd_pipes_grid.append(connections)      # building an array of connection arrays
+       sd_pipes_grid.append(connections)            # building an array of connection arrays
        process = multiprocessing.Process(target=ud, args=(connections, qTime, udq, idq))
-       ud_processes.append(process)
-       process.start()
+       ud_processes.append(process)                 # add this process to the list of processes
+       process.start()                              # start the process
     
     #initialize SD
     p1 = multiprocessing.Process(target=sd, args=(sd_pipes_grid, qTime, sdq, idq))
