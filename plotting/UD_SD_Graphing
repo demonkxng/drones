@@ -1,0 +1,270 @@
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+
+#############
+##FUNCTIONS##
+#############
+
+def newDroneUD():
+    exceptionBool=True
+    global numDronesUD, ax, xud, yud, zud
+    print("UD Drone #",numDronesUD,":")
+    #input user data
+    xin=input("Enter the x value: ")
+    yin=input("Enter the y value: ")
+    zin=input("Enter the z value (depth/always negative): ")
+    #convert to float
+    try:
+        xfl=float(xin)
+        yfl=float(yin)
+        zfl=-abs(float(zin))
+    except:
+        print("Invalid Response.")
+        exceptionBool=False
+    if (exceptionBool):
+        newDroneBool=True
+        #check to see if drone exists
+        for i in range(numDronesUD-1):
+            if (xud[i]==xfl and yud[i]==yfl and zud[i]==zfl):
+                newDroneBool=False
+                print("This drone already exists! (UD#",i+1,")")
+                break
+                
+        #if it doesnt already exist     
+        if(newDroneBool):
+            #append to coords                      
+            xud.append(xfl)
+            yud.append(yfl)
+            zud.append(zfl)
+            numDronesUD+=1
+
+def newDroneSD():
+    exceptionBool=True
+    global numDronesSD, ax, xsd, ysd, zsd
+    print("SD Drone #",numDronesSD,":")
+    #input user data
+    xin=input("Enter the x value: ")
+    yin=input("Enter the y value: ")
+    #convert to float
+    try:
+        xfl=float(xin)
+        yfl=float(yin)
+        zfl=0
+    except:
+        print("Invalid Response.")
+        exceptionBool=False
+    if (exceptionBool):
+        newDroneBool=True
+        #check to see if drone exists
+        for i in range(numDronesSD-1):
+            if (xsd[i]==xfl and ysd[i]==yfl):
+                newDroneBool=False
+                print("This drone already exists! (SD#e",i+1,")")
+                break
+                
+        #if it doesnt already exist     
+        if(newDroneBool):
+            #append to coords                      
+            xsd.append(xfl)
+            ysd.append(yfl)
+            zsd.append(zfl)
+            numDronesSD+=1
+
+
+
+def removeDroneUD():
+    exceptionBool=True
+    global numDronesUD, xud, yud, zud
+    print("Removing a UD!")
+    print("UD LIST, x[], y[], z[]: \n", xud,"\n", yud,"\n", zud)
+    xin=input("Enter the x value: ")
+    yin=input("Enter the y value: ")
+    zin=input("Enter the z value: ")
+    #convert to float
+    try:
+        xfl=float(xin)
+        yfl=float(yin)
+        zfl=float(zin)
+    except:
+        print("Invalid Response.")
+        exceptionBool=False
+    if (exceptionBool):
+        removed=False
+        for i in range(numDronesUD-1):
+            if (xud[i]==xfl and yud[i]==yfl and zud[i]==zfl):
+                print("Removing Drone #",i+1)
+                xud.pop(i)
+                yud.pop(i)
+                zud.pop(i)
+                removed=True
+                numDronesUD-=1
+                break
+        if(not removed):
+            print("Failed to remove drone.")
+
+def removeDroneSD():
+    exceptionBool=True
+    global numDronesSD, xsd, ysd
+    print("Removing an SD!")
+    print("SD LIST, x[], y[]: \n", xsd,"\n", ysd)
+    xin=input("Enter the x value: ")
+    yin=input("Enter the y value: ")
+    #convert to float
+    try:
+        xfl=float(xin)
+        yfl=float(yin)
+    except:
+        print("Invalid Response.")
+        exceptionBool=False
+    if (exceptionBool):
+        removed=False
+        for i in range(numDronesSD-1):
+            if (xsd[i]==xfl and ysd[i]==yfl):
+                print("Removing Drone #",i+1)
+                xsd.pop(i)
+                ysd.pop(i)
+                zsd.pop(i)
+                removed=True
+                numDronesSD-=1
+                break
+        if(not removed):
+            print("Failed to remove drone.")
+            
+def viewGraph():
+    #set up figure and plot
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    
+    global xud, yud, zud, xsd, ysd, zsd
+    printText()
+    print("Close the plot to resume!")
+    plt.cla()
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')  
+    ax.scatter(xud, yud, zud, c='r', marker='o')
+    ax.scatter(xsd, ysd, zsd, c='b', marker='o')
+    plt.show() 
+
+def userExit():
+    return False
+
+def printText():
+    global xud, yud, zud, xsd, ysd, zsd
+    print("SD: ", xsd, ysd, zsd)
+    print("UD: ", xud, yud, zud)
+    
+def printList():
+    global xud, yud, zud, xsd, ysd, zsd
+    for i in range(numDronesSD-1):
+        print("SD#",i+1,": (",xsd[i],",",ysd[i],",",zsd[i],")")
+    for i in range(numDronesUD-1):
+        print("UD#",i+1,": (",xud[i],",",yud[i],",",zud[i],")")
+    
+    
+def addDrones():
+    exceptionBool=True
+    inp=input("How many Drones would you like to add?")
+    try:
+        inp=int(inp)
+    except:
+        print("Invalid Response.")
+        exceptionBool=False
+    if (exceptionBool):    
+        for i in range(inp):
+            print("")
+            droneChoice()
+
+def droneChoice():
+    uinp2=input("Underwater or Surface? [U/S]: ")
+    uinp2=uinp2.upper()
+    if (uinp2 == "U"):
+        newDroneUD()
+    elif (uinp2 == "S"):
+        newDroneSD()
+    else:
+        print("Invalid Response")
+
+def droneChoice2():
+    uinp2=input("Underwater or Surface? [U/S]: ")
+    uinp2=uinp2.upper()
+    if (uinp2 == "U"):
+        removeDroneUD()
+    elif (uinp2 == "S"):
+        removeDroneSD()
+    else:
+        print("Invalid Response")
+        
+def listFuncs():
+    print("Command List:")
+    print("L - Show command list")
+    print("P - Print in Text Format")
+    print("V - View Graph")
+    print("N - Add a new Drone")
+    print("A - Add a few Drones")
+    print("R - Remove a  Drone")
+    print("Q - Quit")
+    
+########
+##MAIN##
+########
+
+#global variable initialization
+
+xsd=[]
+ysd=[]
+zsd=[]
+
+xud=[]
+yud=[]
+zud=[]
+
+numDronesSD=1
+numDronesUD=1
+
+runTime=True
+droneDelay=2
+    
+
+#initializing drones code
+# print("Initializing. Please enter coordinates for 3 SDs.")
+# for i in range(3):
+#     newDroneSD()
+# print("Please enter coordinates for 3 UDs.")
+# for i in range(3):
+#     newDroneUD()
+# print("\n")
+
+
+listFuncs()
+#running loop
+while (runTime):
+    
+    #user input
+    userInp=input("Please enter your command: ")
+    userInp=userInp.upper()
+
+    #choose which function to run
+    if (userInp == "Q"):
+        runTime=userExit()
+    elif (userInp == "N"):
+        droneChoice()
+        viewGraph()
+    elif (userInp == "R"):
+        droneChoice2()
+        viewGraph()
+    elif (userInp == "A"):
+        addDrones()
+        viewGraph()
+    elif (userInp == "P"):
+        printList()
+    elif (userInp == "V"):
+        viewGraph()
+    elif (userInp == "L"):
+        listFuncs()
+    
+    else:
+        print("Invalid Response.")
