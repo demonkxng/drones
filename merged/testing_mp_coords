@@ -14,20 +14,12 @@ def sd(sd_pipes, sd_pipes2, q, sqid):
     while True:
         for i in range(len(sd_pipes)):                  #loop through each connection in the grid
             #writing to UD                 
-            #t1 = time.perf_counter()                #log time in t1
-            #time.sleep(random.random())             #wait 0-1s
             my_data = [os.getpid()]
             sd_pipes[i][0].send(my_data)              #send the timestamp into the pipe for each connection in the grid
-            #idq.put(os.getpid())                    #stores the PID in the id queue
             time.sleep(.1)                           #wait .5s
-            
-            # while (sd_pipes[i][0] != None):   #wait until the pipe is empty
-            #     pass
             
             #reading back 
             my_data = sd_pipes2[i][1].recv()     # recieve data from UD
-            #print("BACK IN SD",my_data)
-            #ud_pid = my_data[1]
             x2=pow((x-my_data[2]),2)
             y2=pow((y-my_data[3]),2)
             z2=pow((z-my_data[4]),2)
@@ -36,7 +28,6 @@ def sd(sd_pipes, sd_pipes2, q, sqid):
             my_data.pop(3)
             my_data.pop(2)
             my_data.append(distance)
-            #print(my_data)
             
             #write to main
             q.put(my_data)                      #sends back to main
@@ -60,7 +51,7 @@ def ud(ud_pipes, ud_pipes2, uqid):
             concat_data.append(x)
             concat_data.append(y)
             concat_data.append(z)
-            #print("IN UD",concat_data)
+
             #writing back
             ud_pipes2[i][0].send(concat_data)       #send the timestamp and UD PID back
             time.sleep(1)
@@ -100,19 +91,6 @@ def GPSfunc(dGrid, originalPos, sd_coords, ud_pid, sd_pids):
     sd3 = [ sd_xpos[2] , sd_ypos[2] , sd_zpos[2] ]
     SDdGrid = assembleSDdGrid(sd_xpos, sd_ypos, sd_zpos,0,1,2)
     
-    #rearrange dGrid to match correct order of SDdGrid, using sd_pids 
-    # # #this is wrong atm
-    # dGrid2=[]
-    # for i in range(len(sd_ids)):
-    #     for j in range(len(sd_pids)):
-    #         if (sd_ids[i]==sd_pids[j]):
-    #             dGrid2.append(dGrid[j])
-    
-    print("bad distances:",dGrid)
-    # print("distances found: ",dGrid2)
-    print("SDdGrid:",SDdGrid)
-    print("Entered GPSfunc for UID", ud_pid)
-    
     #remap coordinate system to [0,0,0] , [U,0,0], [Vx,Vy,0]
     [s1, s2, s3] = SDdGrid
     myY = pow(s1,2)+pow(s2,2)-pow(s3,2)
@@ -122,17 +100,14 @@ def GPSfunc(dGrid, originalPos, sd_coords, ud_pid, sd_pids):
     Vy = myY    #j
     U = s1      #h
     [d1, d2, d3] = dGrid
-    print("Vx,Vy,U:",Vx,Vy,U)
     
     #creating normal vectors e1hat e2hat e3hat
     
-    #e1bar = v2-v1
     e1bar = [ sd2[0]-sd1[0], sd2[1]-sd1[1], sd2[2]-sd1[2] ]
     #calculating normal of e1bar
     e1barNorm = math.sqrt(pow(e1bar[0],2)+pow(e1bar[1],2)+pow(e1bar[2],2))
     #e1hat = e1bar/e1barNorm
     e1hat = [ e1bar[0]/e1barNorm , e1bar[1]/e1barNorm , e1bar[2]/e1barNorm]
-    print("e1hat =",e1hat)
     
     #the vector v3-v1 is used twice, so it is named v3_minus_v1
     v3_minus_v1 = [ sd3[0] - sd1[0], sd3[1] - sd1[1], sd3[2] - sd1[2] ]
@@ -146,30 +121,24 @@ def GPSfunc(dGrid, originalPos, sd_coords, ud_pid, sd_pids):
     e2barNorm = math.sqrt(pow(e2bar[0],2)+pow(e2bar[1],2)+pow(e2bar[2],2))
     #e2hat = e2bar/e2barNorm
     e2hat = [ e2bar[0]/e2barNorm , e2bar[1]/e2barNorm , e2bar[2]/e2barNorm]
-    print("e2hat =",e2hat)
     
     #cross product // e3hat = e1hat x e2hat
     e30= e1hat[1]*e2hat[2]-e1hat[2]*e2hat[1]
     e31= e1hat[2]*e2hat[0]-e1hat[0]*e2hat[2]
     e32= e1hat[0]*e2hat[1]-e1hat[1]*e2hat[0]
     e3hat = [e30, e31, e32]
-    print("e3hat =",e3hat)
     
     #dissasemble e1hat e2hat e3hat
     [X1,Y1,Z1] = e1hat
     [X2,Y2,Z2] = e2hat
     [X3,Y3,Z3] = e3hat    
     
-    #print(Z1,Z2,Z3)
     
     #find u,v,w
     myu=pow(d1,2)-pow(d2,2)+pow(U,2)
     myu/=(2*U)
-    print("myu", myu)
     myv=pow(d1,2)-pow(d3,2)+pow(Vx,2)+pow(Vy,2)-2*myu*Vx
     myv/=(2*Vy)
-    print("myv",myv)
-    #print("d1",d1,"myu",myu,"myv",myv)
     myw=-(math.sqrt(abs(pow(d1,2)-pow(myu,2)-pow(myv,2))))
     
     #disassemble offsets
@@ -220,10 +189,6 @@ def checkList(data, ud_pid, original, sd_coords):
             break
     #after the loop is done, sd_pids should have 3
     if foundBool:
-        # print("UD:",ud_pid)
-        # for i in range(ctr):
-        #     print ("sd#",i,"pid",sd_pids[i],"distance",distances[i])
-        # print("")
         GPSfunc(distances, original, sd_coords, ud_pid, sd_pids)
           
 ######################################
@@ -235,7 +200,6 @@ if __name__ == "__main__":
    #build queues for different purposes
     sdq = multiprocessing.Queue()           #transmitting SD IDs
     udq = multiprocessing.Queue()           #transmitting UD IDs
-    #sdCoordsQ = multiprocessing.Queue()     #transmitting SD coordinates
     
     #a list for all the queues for each SD
     sd2mainQ = multiprocessing.Queue()
@@ -309,10 +273,8 @@ if __name__ == "__main__":
     data_storage = []
     print("[SD_PID, UD_PID, DISTANCE]")
     while 1:
-        #print("yea")
         ctr+=1
         
-       
         # store all SD IDs, coords, and increments counter
         while sdq.empty() is False:
             sdInfo = sdq.get()
@@ -322,7 +284,6 @@ if __name__ == "__main__":
             sd_ids.append(sdInfo[3])
             sd_len+=1
             
-        
         # store all UD IDs and increment counter
         while udq.empty() is False:
             ud_ids.append(udq.get())   
@@ -332,8 +293,7 @@ if __name__ == "__main__":
         while sd2mainQ.empty() is False:
             # EVERY DATA THAT IS PULLED OUT OF THE QUEUE IS GOING TO BE [TIME, UD_PID, SD_PID]
             myData = sd2mainQ.get() #store time, ud_pid, sd_pid
-            #print("A pin from",myData[2],"to",myData[1],"took",myData[0],"seconds") #print the data
-            #print(myData)
+            print(myData)
             
             #locates where in array to store the data
             data_storage.append(myData)
@@ -349,14 +309,7 @@ if __name__ == "__main__":
             print("")
             for i in range(sd_len):
                 print("SD#",i,", ID:",sd_ids[i])
-            print("")
-            # for i in range(len(sd_xpos)):
-            #     print ("SD_XPOS:", sd_xpos[i])
-            # for i in range(len(sd_ypos)):
-            #     print ("SD_YPOS:", sd_ypos[i])
-            # for i in range(len(sd_zpos)):
-            #     print ("SD_ZPOS:", sd_zpos[i])
-            
+            print("")            
             
             origin = [ sd_xpos[0], sd_ypos[0], sd_zpos[0] ]
             sd_coords = [sd_xpos, sd_ypos, sd_zpos]
