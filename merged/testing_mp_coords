@@ -83,7 +83,6 @@ def GPSfunc(dGrid, originalPos, sd_coords, ud_pid, sd_pids):
     #ALL CODE IS ORIGINAL, BUT MATH IS NOT MINE
     
     
-    
     #decompile sd_coords
     [sd_xpos, sd_ypos, sd_zpos] = sd_coords
     sd1 = [ sd_xpos[0] , sd_ypos[0] , sd_zpos[0] ]
